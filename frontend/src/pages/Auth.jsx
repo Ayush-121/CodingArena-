@@ -1,0 +1,11 @@
+import {useState} from "react";
+import {Link,useNavigate} from "react-router-dom";
+import {useDispatch} from "react-redux";
+import {Code2,LockKeyhole,Mail,UserRound,ArrowRight} from "lucide-react";
+import api from "../api";
+import {setUser} from "../store";
+export default function Auth({mode}) {
+ const register=mode==="register", [form,setForm]=useState({username:"",email:"",password:""}),[error,setError]=useState(""),[busy,setBusy]=useState(false),dispatch=useDispatch(),nav=useNavigate();
+ async function submit(e){e.preventDefault();setError("");setBusy(true);try{const r=await api.post(`/auth/${register?"register":"login"}`,form);dispatch(setUser(r.data.user));nav("/");}catch(e){setError(e.response?.data?.message||"Unable to authenticate. Check the API connection.");}finally{setBusy(false);}}
+ return <div className="auth-wrap"><div className="auth-card"><div className="auth-brand"><span className="brand-mark"><Code2/></span><b>code<span className="mint">arena</span></b></div><div className="eyebrow">YOUR NEXT LEVEL STARTS HERE</div><h1>{register?"Create your account":"Welcome back"}</h1><p className="muted">{register?"Join a community of consistent problem solvers.":"Sign in to continue your coding journey."}</p><form onSubmit={submit}>{register&&<label className="field"><span>Username</span><div><UserRound size={17}/><input required value={form.username} onChange={e=>setForm({...form,username:e.target.value})} placeholder="Your username"/></div></label>}<label className="field"><span>Email address</span><div><Mail size={17}/><input type="email" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="you@example.com"/></div></label><label className="field"><span>Password</span><div><LockKeyhole size={17}/><input type="password" minLength="8" required value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="At least 8 characters"/></div></label>{error&&<div className="form-error">{error}</div>}<button className="btn btn-primary auth-submit" disabled={busy}>{busy?"Please wait...":register?"Create account":"Sign in"} <ArrowRight size={16}/></button></form><p className="auth-switch">{register?"Already have an account?":"New to CodeArena?"} <Link to={register?"/login":"/register"}>{register?"Sign in":"Create account"}</Link></p></div></div>
+}
